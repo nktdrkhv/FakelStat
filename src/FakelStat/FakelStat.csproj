@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-FakelStat-0ddc4597-8eb7-4016-82e9-21181749d4b5</UserSecretsId>
+    <RestoreAdditionalProjectSources>https://nu.nktdrkhv.ru/v3/index.json</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LinkDotNet.NCronJob" Version="0.13.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+    <PackageReference Include="PetaPoco.Compiled" Version="6.0.677" />
+    <PackageReference Include="ScottPlot" Version="5.0.23" />
+    <PackageReference Include="Telegram.Bot" Version="20.0.0-alpha.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Files\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
