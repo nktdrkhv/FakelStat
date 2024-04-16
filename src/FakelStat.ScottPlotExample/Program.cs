@@ -28,19 +28,23 @@
 
 // myPlot.SavePng("demo.png", 1200, 300);
 
-var f1 = Task.Run(async () => await Foo("f1", 3000));
+// -------------------------------------
+
+// var f1 = Task.Run(async () => await Foo("f1", 3000));
 
 
-var s1 = f1.ContinueWith(async (_) => await Foo("s1", 2000), TaskContinuationOptions.OnlyOnRanToCompletion);
-var q1 = s1.ContinueWith(async (_) => await Foo("q1", 3000), TaskContinuationOptions.OnlyOnRanToCompletion);
+// var s1 = f1.ContinueWith(async (_) => await Foo("s1", 2000), TaskContinuationOptions.OnlyOnRanToCompletion);
+// var q1 = s1.ContinueWith(async (_) => await Foo("q1", 3000), TaskContinuationOptions.OnlyOnRanToCompletion);
 
-async Task Foo(string s, int delay)
-{
-    Console.WriteLine($"{s} start");
-    await Task.Delay(delay);
-    Console.WriteLine($"{s} con");
-    await Task.Delay(delay);
-    Console.WriteLine($"{s} end");
-}
+// async Task Foo(string s, int delay)
+// {
+//     Console.WriteLine($"{s} start");
+//     await Task.Delay(delay);
+//     Console.WriteLine($"{s} con");
+//     await Task.Delay(delay);
+//     Console.WriteLine($"{s} end");
+// }
 
-Console.ReadKey();
+// Console.ReadKey();
+
+Console.WriteLine("hello world");
