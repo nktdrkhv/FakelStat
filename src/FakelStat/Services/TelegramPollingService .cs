@@ -48,26 +48,54 @@ public class TelegramPollingService : BackgroundService
             {
                 await foreach (var update in _updateReciever.WithCancellation(stoppingToken))
                 {
-                    if (_userUpdates.TryGetValue(update.GetId(), out var user))
-                    {
-                        // добавить 
-                        lock (user.Updates)
+                    UserUpdates user;
+                    long id = update.GetId();
+                    if (!_userUpdates.TryGetValue(id, out user!))
+                        _userUpdates[id] = user = new UserUpdates()
                         {
-                            //if (user.Mission != null)
-                        }
+                            Cts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken)
+                        };
+                    lock (user)
+                    {
+                        user.LastActivity = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                        if (user.Mission == null)
+                            user.Mission = Run(user, update, user.Cts.Token);
+                        else
+                            user.Updates.Enqueue(update);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception during polling");
+            }
+        }
+        _cleanerTimer.Stop();
+        _cleanerTimer.Dispose();
+    }
+
+    public Task Run(UserUpdates user, Update update, CancellationToken stoppingToken) =>
+        Task.Run(() => ProcessUpdateAsync(update), stoppingToken).ContinueWith(_ =>
+            {
+                Update? nextUpdate;
+                lock (user)
+                    if (user.Updates.Count == 0)
+                    {
+                        user.Mission = null;
+                        return;
                     }
                     else
                     {
-                        // создать и запустить
+                        nextUpdate = user.Updates.Dequeue();
+                        user.Mission = Run(user, update, user.Cts.Token);
                     }
+            }, stoppingToken);
 
-                }
-            }
-            catch { }
-        }
-
-        _cleanerTimer.Stop();
-        _cleanerTimer.Dispose();
+    public async Task ProcessUpdateAsync(Update update)
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var telegramService = scope.ServiceProvider.GetRequiredService<TelegramService>();
+        await telegramService.HandleUpdate(update);
     }
 
     protected void OnCleanCache(object? sender, ElapsedEventArgs args)
@@ -81,9 +109,11 @@ public class TelegramPollingService : BackgroundService
             }
     }
 
-    public record struct UserUpdates(
-        Task? Mission,
-        Queue<Update> Updates,
-        long LastActivity,
-        CancellationTokenSource Cts);
+    public class UserUpdates
+    {
+        public Task? Mission { get; set; }
+        public Queue<Update> Updates { get; set; } = new();
+        public long LastActivity { get; set; }
+        public CancellationTokenSource Cts { get; set; } = null!;
+    }
 }
