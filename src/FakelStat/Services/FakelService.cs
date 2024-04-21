@@ -22,6 +22,21 @@ public class FakelService(HttpClient httpClient)
             throw new Exception($"Can't get current load. Status code is {response.StatusCode}");
     }
 
+    public async ValueTask<WorkoutLoad> GetWorkoutLoadAsync(Guid workoutId, CancellationToken ct = default)
+    {
+        var response = await httpClient.GetAsync($"https://mobifitness.ru/api/v8/schedule/{workoutId}/item.json?clubId=1325", ct);
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonStream = await response.Content.ReadAsStreamAsync(ct);
+            var jsonDocument = JsonDocument.Parse(jsonStream);
+            var availableSlots = jsonDocument.RootElement.GetProperty("availableSlots").GetInt32();
+            var roomCapacity = jsonDocument.RootElement.GetProperty("room").GetProperty("capacity").GetInt32();
+            return new(roomCapacity, availableSlots);
+        }
+        else
+            throw new Exception($"Can't get current load. Status code is {response.StatusCode}");
+    }
+
     public async ValueTask<IEnumerable<Workout>> GetDayScheduleAsync(DateTime day, CancellationToken ct = default)
     {
         var year = day.Year;
@@ -37,22 +52,29 @@ public class FakelService(HttpClient httpClient)
             var wourkoutList = new List<Workout>();
             foreach (var element in schedule.EnumerateArray())
             {
-                var length = element.GetProperty("length").GetInt32();
                 var start = element.GetProperty("datetime").GetDateTimeOffset().DateTime;
                 if (start.Date == day.Date)
+                {
+                    var length = element.GetProperty("length").GetInt32();
+                    var id = element.GetProperty("id").GetGuid();
+                    var workoutLoad = await GetWorkoutLoadAsync(id, ct);
                     wourkoutList.Add(
                         new Workout
                         {
-                            ExternalId = element.GetProperty("id").GetGuid(),
+                            ExternalId = id,
                             Title = element.GetProperty("activity").GetProperty("title").GetString()!,
                             Start = start,
                             End = start.AddMinutes(length),
+                            Load = workoutLoad.RoomCapacity - workoutLoad.AvailableSlots
                         }
                     );
+                }
             }
             return wourkoutList.OrderBy(w => w.Start);
         }
         else
             throw new Exception($"Can't get day schedule. Status code is {response.StatusCode}");
     }
+
+    public record struct WorkoutLoad(int RoomCapacity, int AvailableSlots);
 }

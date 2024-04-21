@@ -21,9 +21,11 @@ public class FakelServiceTests
         _client = new HttpClient(new HttpClientHandler()
         {
             AutomaticDecompression = DecompressionMethods.GZip
-        });
+        })
+        {
+            DefaultRequestVersion = HttpVersion.Version20
+        };
         var fakelOptions = _conf.GetSection("Fakel").Get<FakelOptions>();
-        _client.DefaultRequestVersion = HttpVersion.Version20;
         foreach (var (title, value) in fakelOptions!.Headers)
             _client.DefaultRequestHeaders.Add(title, value);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", fakelOptions.Token);

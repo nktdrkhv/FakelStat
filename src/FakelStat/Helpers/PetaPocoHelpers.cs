@@ -2,7 +2,7 @@ using PetaPoco;
 
 namespace FakelStat.Helpers;
 
-public static class PetaPocoHelpers
+public static class PetaPocoHelper
 {
     public static void ConfigureMapper(ConventionMapper mapper)
     {

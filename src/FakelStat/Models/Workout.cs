@@ -7,4 +7,5 @@ public class Workout
     public string Title { get; set; } = null!;
     public DateTime Start { get; set; }
     public DateTime End { get; set; }
+    public int Load { get; set; }
 }

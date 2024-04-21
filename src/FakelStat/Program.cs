@@ -57,7 +57,7 @@ builder.Services.AddCronJob<GetTodaySchedule>(options => options.CronExpression 
 builder.Services.AddSingleton(_ => DatabaseConfiguration.Build()
         .UsingConnectionString(builder.Configuration.GetConnectionString("FakelDbSQlite"))
         .UsingProvider<SQLiteDatabaseProvider>()
-        .UsingDefaultMapper<ConventionMapper>(PetaPocoHelpers.ConfigureMapper)
+        .UsingDefaultMapper<ConventionMapper>(PetaPocoHelper.ConfigureMapper)
         .WithoutAutoSelect());
 builder.Services.AddScoped(sp => sp.GetRequiredService<IDatabaseBuildConfiguration>().Create());
 

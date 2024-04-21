@@ -14,7 +14,7 @@ public class SqlMomentumLoadRepositoryTests
         _database = DatabaseConfiguration.Build()
          .UsingConnectionString("Data Source=Files/fakel.sqlite3;Version=3;")
          .UsingProvider<SQLiteDatabaseProvider>()
-         .UsingDefaultMapper<ConventionMapper>(PetaPocoHelpers.ConfigureMapper)
+         .UsingDefaultMapper<ConventionMapper>(PetaPocoHelper.ConfigureMapper)
          .WithoutAutoSelect()
          .Create();
     }
